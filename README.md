@@ -33,10 +33,20 @@ services:
   desktop:
     image: lscr.io/linuxserver/webtop:debian-xfce
     container_name: desktop
-    privileged: true
+
+    privileged: false
 
     environment:
       - TZ=Asia/Kolkata
+      - PUID=1000
+      - PGID=1000
+
+      - CUSTOM_USER=admin
+      - PASSWORD=strong_password_here
+      - TITLE=Web Desktop
+
+      # Slight UI responsiveness improvement for browsers
+      - CHROME_CLI=--disable-dev-shm-usage --no-sandbox
 
     ports:
       - "6080:3000"
@@ -44,10 +54,27 @@ services:
     volumes:
       - ./config:/config
 
-    shm_size: "2gb"
+    # Important for GUI apps (Chrome, VS Code, etc.)
+    shm_size: "4gb"
+
+    # CPU and memory control for balanced performance
+    cpus: 3.5
+    mem_limit: 12g
+
+    # Better I/O and file handling
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+
+    # Hardware acceleration (if supported)
+    devices:
+      - /dev/dri:/dev/dri
+
+    security_opt:
+      - no-new-privileges:true
 
     restart: unless-stopped
-```
 
 ---
 
