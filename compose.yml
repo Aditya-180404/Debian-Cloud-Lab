@@ -1,40 +1,71 @@
 services:
-  desktop:
-    image: lscr.io/linuxserver/webtop:debian-xfce
-    container_name: desktop
 
-    privileged: false
+  webtop:
+    image: lscr.io/linuxserver/webtop:debian-xfce
+    container_name: webtop
 
     environment:
       - TZ=Asia/Kolkata
       - PUID=1000
       - PGID=1000
-
       - CUSTOM_USER=admin
       - PASSWORD=123
-      - TITLE=Web Desktop
+      - TITLE=Webtop
 
     ports:
       - "6080:3000"
 
     volumes:
-      - ./config:/config
+      - ./webtop:/config
 
     shm_size: "4gb"
 
-    # SAFE performance limits (works almost everywhere)
-    cpus: 4
-    mem_limit: 12g
+    cpus: 1.5
+    mem_limit: 4g
 
-    ulimits:
-      nofile:
-        soft: 65535
-        hard: 65535
+    restart: unless-stopped
 
-    devices:
-      - /dev/dri:/dev/dri
 
-    security_opt:
-      - no-new-privileges:true
+  kali:
+    image: lscr.io/linuxserver/kali-linux:latest
+    container_name: kali
+
+    privileged: true
+
+    environment:
+      - TZ=Asia/Kolkata
+      - PUID=0
+      - PGID=0
+      - CUSTOM_USER=root
+      - PASSWORD=123
+      - TITLE=Kali
+
+    ports:
+      - "6081:3000"
+
+    volumes:
+      - ./kali:/config
+
+    shm_size: "4gb"
+
+    cpus: 2
+    mem_limit: 8g
+
+    restart: unless-stopped
+
+
+  vpn:
+    image: qmcgaw/gluetun
+    container_name: vpn
+
+    cap_add:
+      - NET_ADMIN
+
+    environment:
+      - VPN_TYPE=wireguard
+      # (add your VPN config here)
+
+    ports:
+      - "8888:8888"
 
     restart: unless-stopped
